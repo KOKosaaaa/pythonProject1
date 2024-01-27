@@ -1,0 +1,46 @@
+{
+  "start_location": {
+    "description": "Добро пожаловать в игру! Ты находишься в лесу. Что будешь делать?",
+    "options": {
+      "Глубже в лес": "next_location",
+      "Вернуться на опушку": "flower_field",
+      "Исследовать старое дерево": "tree_loc"
+    },
+    "loc_image": "https://ibb.co/bHBSFLh"
+  },
+  "next_location": {
+    "description": "Ты пришел в забытую деревню. Что будешь делать?",
+    "options": {
+      "Подойти к старому колодцу": "loc",
+      "Заглянуть в заброшенный дом": "loc",
+      "Попробовать открыть дверь храма": "loc",
+      "Назад": "loc_back",
+      "Помощь": "help"
+    },
+    "loc_image": "https://ibb.co/0ZnYx3D"
+  },
+  "flower_field": {
+    "description": "Ты вернулся на опушку леса. Что будешь делать?",
+    "options": {
+      "Глубже в лес": "next_location",
+      "Вернуться на опушку": "flower_field",
+      "Исследовать старое дерево": "tree_loc"
+    },
+    "loc_image": "https://ibb.co/some-image-url"
+  },
+  "tree_loc": {
+    "description": "Ты нашел старое дерево. Что будешь делать?",
+    "options": {
+      "Подойти ближе": "item_found",
+      "Вернуться": "next_location"
+    },
+    "loc_image": "https://ibb.co/another-image-url"
+  },
+  "item_found": {
+    "description": "Ты обнаружил полезный предмет. Поздравляем!",
+    "options": {
+      "Продолжить": "next_location"
+    },
+    "loc_image": "https://ibb.co/some-other-image-url"
+  }
+}
