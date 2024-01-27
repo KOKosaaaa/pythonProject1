@@ -1,6 +1,3 @@
-
-
-
 import os
 import json
 import telebot
@@ -33,9 +30,13 @@ def create_keyboard(buttons):
     keyboard.add(*[types.KeyboardButton(button) for button in buttons])
     return keyboard
 
+# Уберем дублирование функций сохранения и загрузки данных
 def save_game_data():
-    with open('game_data.json', 'w') as json_file:
-        json.dump(user_levels, json_file)
+    try:
+        with open('game_data.json', 'w') as json_file:
+            json.dump(user_levels, json_file)
+    except Exception as e:
+        print(f"Ошибка при сохранении данных: {e}")
 
 def load_game_data():
     global user_levels
@@ -44,6 +45,8 @@ def load_game_data():
             user_levels = json.load(json_file)
     except FileNotFoundError:
         user_levels = {}
+    except Exception as e:
+        print(f"Ошибка при загрузке данных: {e}")
 
 def check_ticket(user_id):
     inventory = user_levels.get(user_id, {}).get("inventory", [])
@@ -52,12 +55,13 @@ def check_ticket(user_id):
             return True
     return False
 
-
 @bot.message_handler(commands=['start'])
 def handle_start(message):
     user_id = message.from_user.id
-    user_levels.setdefault(user_id, {"level": 1, "game_over": False, "inventory": []})
-    start_text = "Ты просыпаешься в середине густого и таинственного леса. Туман окутывает деревья, создавая зловещую атмосферу. Перед тобой несколько тропинок, каждая ведет в неизвестность. Твое приключение начинается!"
+    # Используем user_id как ключ в словаре user_levels
+    user_data = user_levels.setdefault(user_id, {"level": 1, "game_over": False, "inventory": []})
+    user_data["game_over"] = False
+    start_text = "Ты просыпаешься в середине густого и таинственного леса..."
     bot.send_photo(user_id, action_images["глубже в лес"], start_text, reply_markup=create_keyboard(["Глубже в лес", "Вернуться на опушку", "Исследовать старое дерево"]))
     save_game_data()
 
@@ -78,18 +82,20 @@ def confirm_help(callback_query):
 @bot.message_handler(func=lambda message: True)
 def handle_message(message):
     user_id = message.from_user.id
-    current_level = user_levels.get(user_id, {}).get("level", 1)
-    game_over = user_levels.get(user_id, {}).get("game_over", False)
-    inventory = user_levels.get(user_id, {}).get("inventory", [])
+    user_data = user_levels.setdefault(user_id, {"level": 1, "game_over": False, "inventory": []})
+    current_level = user_data["level"]
+    game_over = user_data["game_over"]
+    inventory = user_data["inventory"]
     user_input = message.text.lower()
 
     if game_over:
-        bot.send_message(user_id, "Игра завершена. Ты уже проиграл.\n Нажми /start")
+        if current_level != 0:
+            bot.send_message (user_id, "Игра завершена. Ты уже проиграл.\n Нажми /start")
         return
 
     if current_level == 1:
         if "глубже в лес" in user_input:
-            level_text = "Проходя глубже в лес, ты натыкаешься на старую заброшенную деревню. Дома покрыты плющом и мхом, окна разбиты. Здесь чувствуется тайна, забытая временем. Что будешь делать?"
+            level_text = "Проходя глубже в лес, ты натыкаешься на старую заброшенную деревню..."
             user_levels[user_id]["level"] = 2
             bot.send_photo (user_id, action_images["глубже в лес"], level_text, reply_markup=create_keyboard (
                 ["Подойти к старому колодцу", "Заглянуть в заброшенный дом", "Попробовать открыть дверь храма",
@@ -109,8 +115,7 @@ def handle_message(message):
             else:
                 bot.send_message (user_id,
                                   "Тебе нужен билет, чтобы пройти в таверну. Возможно, стоит поискать его где-то еще.")
-
-    elif "помощь" in user_input:
+        elif "помощь" in user_input:
             handle_help(message)
 
     if current_level == 2:
@@ -192,7 +197,6 @@ def handle_message(message):
 def get_random_item():
     return random.choice(list(items.keys()))
 
-
 def save_game_data():
     with open('game_data.json', 'w') as json_file:
         json.dump(user_levels, json_file)
@@ -206,8 +210,8 @@ def load_game_data():
         user_levels = {}
 
 def end_game(user_id, message):
-    user_levels[user_id]["game_over"] = True
-    save_game_data()  # Сохраняем данные игрока
+    user_levels[user_id]["level"] = 1  # Установите уровень в 0, чтобы сигнализировать об окончании игры
+    save_game_data ()  # Сохраните данные игрока
     print(f"Игра завершена: {message}")
     bot.send_message(user_id, f"{message} Игра завершена. Нажми /start")  # Убираем клавиатуру
 
