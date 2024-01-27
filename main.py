@@ -73,10 +73,19 @@ def handle_help(message):
     markup.add(confirm_button)
     bot.send_message(user_id, "Ты уверен, что хочешь увидеть карту? Там отмечены все пути и показанны правильные пути.", reply_markup=markup)
 
+@bot.message_handler(commands=['info'])
+def handle_info(message):
+    user_id = message.from_user.id
+    info_text = ("Это приключенческая игра в Telegram, где ты исследуешь таинственный мир, "
+                 "решаешь загадки и принимаешь решения, которые влияют на исход твоего путешествия. "
+                 "Цель игры - исследовать различные локации, находить предметы и раскрывать секреты этого мира. "
+                 "Будь осторожен, каждый выбор имеет последствия!")
+    bot.send_message(user_id, info_text)
+
 @bot.callback_query_handler(func=lambda call: call.data == "confirm_help")
 def confirm_help(callback_query):
     user_id = callback_query.from_user.id
-    map_photo_url = "https://ibb.co/b3yQSPy"  # Замените ссылку на вашу картинку
+    map_photo_url = "https://ibb.co/wr79NTc"  # Замените ссылку на вашу картинку
     bot.send_photo(user_id, map_photo_url, caption="Вот карта, как ты просил, я сам сделал в пеинте.")
 
 @bot.message_handler(func=lambda message: True)
